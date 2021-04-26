@@ -13,9 +13,7 @@ data "aws_availability_zones" "available" {
 # icanhazip.com to determine local workstation external IP
 # to open EC2 Security Group access to the Kubernetes cluster.
 # See workstation-external-ip.tf for additional information.
-provider "kubernetes" {
-  config_path = "~/.kube/config"
-}
+
 
 provider "http" {
 }
