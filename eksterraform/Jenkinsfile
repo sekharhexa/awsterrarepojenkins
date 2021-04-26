@@ -10,7 +10,7 @@ pipeline {
   stages {
     stage('checkout') {
         steps {
-            git 'https://github.com/sekharhexa/Terraform_EKS_Jenkins_CICD.git'
+            git 'https://github.com/sekharhexa/awsterrarepojenkins.git'
         }
     }
 	stage('Setup') {
