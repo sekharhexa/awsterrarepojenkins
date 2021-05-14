@@ -1,0 +1,50 @@
+pipeline {
+
+  agent any
+  
+  parameters {
+	choice(name: 'action', choices: 'create\nrollback', description: 'Create/rollback of the deployment')
+  }
+    stages {
+	    stage("Create deployment") {
+			when {
+				expression { params.action == 'create' }
+			}
+	        steps {
+	                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
+	                        accessKeyVariable: 'AWS_ACCESS_KEY_ID', 
+	                        credentialsId: 'AWS_Credentials', 
+	                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+	                    withCredentials([kubeconfigFile(credentialsId: 'kubernetes_config', 
+	                        variable: 'KUBECONFIG')]) {
+	                        sh 'export KUBECONFIG=$HOME/.kube/config'
+			                sh 'kubectl get nodes'
+	                        sh 'curl -O https://raw.githubusercontent.com/pixie-labs/pixie-demos/main/eks-workshop/complete-demo.yaml'
+	                        sh 'kubectl apply -f complete-demo.yaml'
+					    	sh 'kubectl get pods -n px-sock-shop'
+					    	sh 'export SERVICE_IP=$(kubectl -n px-sock-shop get svc front-end --template "{{- if .status.loadBalancer  }}{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}{{ end }}")'
+					    	sh 'echo http://$SERVICE_IP/'
+	                    }
+	                }
+	        }
+	    }
+		stage("rollback deployment") {
+			when {
+				expression { params.action == 'rollback' }
+			}
+	        steps {
+	           withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', 
+	                        accessKeyVariable: 'AWS_ACCESS_KEY_ID', 
+	                        credentialsId: 'AWS_Credentials', 
+	                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+	               withCredentials([kubeconfigFile(credentialsId: 'kubernetes_config', 
+	                        variable: 'KUBECONFIG')]) {
+	               sh """
+	                    kubectl delete namespace px-sock-shop
+				   """
+	               }
+	            }
+	        }
+	    }
+    }
+}
