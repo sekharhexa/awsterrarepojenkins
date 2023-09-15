@@ -71,7 +71,7 @@ pipeline {
 					terraform output -raw kubeconfig > $HOME/.kube/config
 					export KUBECONFIG=$HOME/.kube/config
 				"""
-				sh 'sudo chown $(id -u):$(id -g) $HOME/.kube/config'
+				sh 'sudo -S chown $(id -u):$(id -g) $HOME/.kube/config'
 				sleep 30
 				sh 'kubectl get nodes'
 				}
