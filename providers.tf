@@ -4,6 +4,7 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
+  instance_type = var.instance_type
 }
 
 data "aws_availability_zones" "available" {
